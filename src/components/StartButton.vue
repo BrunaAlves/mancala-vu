@@ -28,8 +28,10 @@ export default {
       MancalaService.startGame()
         .then((response) => {
           this.mancala = response.data;
-          this.isHidden = true;
-          this.$emit('isStartButtonHidden', this.isHidden)
+          // this.isHidden = true;
+          // this.$emit('isStartButtonHidden', this.isHidden)
+          this.$router.push("/game")
+
         })
         .catch((e) => {
           console.log(e);

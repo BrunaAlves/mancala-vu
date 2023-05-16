@@ -26,9 +26,7 @@ export default {
     endGame() {
       MancalaService.endGame()
         .then(() => {
-          this.isHidden = true;
-          console.log(this.isHidden);
-          this.$emit('isEndButtonHidden', this.isHidden)
+          this.$router.push("/start")
         })
         .catch((e) => {
           console.log(e);

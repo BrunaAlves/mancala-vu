@@ -1,17 +1,26 @@
 <template>
   <div id="app">
-    <Mancala />
+    <router-view />
   </div>
 </template>
 
 <script>
-import Mancala from './components/Mancala.vue'
+import MancalaService from "./services/MancalaService";
 
 export default {
   name: 'App',
   components: {
-    Mancala
-  }
+  },
+  mounted() {
+    MancalaService.getGame()
+      .then((response) => {
+        this.mancalaGame = response.data;
+        this.$router.push("/game")
+      })
+      .catch(() => {
+        this.$router.push("/start")
+      });
+  },
 }
 </script>
 
