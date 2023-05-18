@@ -10,6 +10,9 @@ class MancalaService {
   endGame() {
     return http.delete("/game/end");
   }
+  getMoves(id) {
+    return http.get(`/game/moves/${id}`);
+  }
 
 }
 

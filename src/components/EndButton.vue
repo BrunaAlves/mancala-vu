@@ -4,7 +4,6 @@
       type="button"
       class="btn btn-danger"
       @click="endGame()"
-      v-if="!isEndHidden"
     >
       End Game
     </button>
@@ -16,10 +15,8 @@ import MancalaService from "../services/MancalaService";
 
 export default {
   name: "end-game",
-  props: ["isEndHidden"],
   data() {
     return {
-      isHidden: this.isEndHidden
     };
   },
   methods: {

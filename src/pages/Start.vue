@@ -3,8 +3,6 @@
     <h4>Welcome to Mancala</h4>
     <div>
       <StartButton
-        :isStartHidden="isStartHidden"
-        @isStartButtonHidden="onClickStart"
       />
     </div>
   </div>

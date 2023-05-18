@@ -4,7 +4,6 @@
       type="button"
       class="btn btn-primary"
       @click="startGame()"
-      v-if="!isStartHidden"
     >
       Start Game
     </button>
@@ -16,11 +15,9 @@ import MancalaService from "../services/MancalaService";
 
 export default {
   name: "start-game",
-  props: ["isStartHidden"],
   data() {
     return {
-      mancala: {},
-      isHidden: this.isStartHidden,
+      mancala: {}
     };
   },
   methods: {
@@ -28,8 +25,6 @@ export default {
       MancalaService.startGame()
         .then((response) => {
           this.mancala = response.data;
-          // this.isHidden = true;
-          // this.$emit('isStartButtonHidden', this.isHidden)
           this.$router.push("/game")
 
         })
@@ -39,7 +34,6 @@ export default {
     },
   },
   mounted() {
-    //  this.retrieveTest();
   },
 };
 </script>
