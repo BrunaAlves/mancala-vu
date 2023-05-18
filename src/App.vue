@@ -13,8 +13,7 @@ export default {
   },
   mounted() {
     MancalaService.getGame()
-      .then((response) => {
-        this.mancalaGame = response.data;
+      .then(() => {
         this.$router.push("/game")
       })
       .catch(() => {

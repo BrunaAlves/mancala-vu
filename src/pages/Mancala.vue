@@ -2,27 +2,28 @@
   <div>
     <h4>Lets Play Mancala</h4>
     <p>Current Player Name: {{ currentPlayer.username }}</p>
-      <div class="board">
-        <div class="large-pit-container" :active="currentPlayer.id === mancalaGame.players[0].id">
-          <div class="pit" :key="mancalaGame.players[0].largePit.id" :active="false">
-              {{ mancalaGame.players[0].largePit.stones }}
+    <p>IsProcessing: {{ isProcessing }}</p>
+      <div class="board" v-show="!isLoading">
+        <div class="large-pit-container" :active="currentPlayer.id === player0.id">
+          <div class="pit" :key="player0.largePit.id" :active="false">
+              {{ player0.largePit.stones }}
           </div>
         </div>
         <div class="pits-rows-container">
-          <div class="pits-row" :active="currentPlayer.id === mancalaGame.players[0].id">
-            <div class="pit" v-for="pit in mancalaGame.players[0].pits.filter((x, xi) => xi < mancalaGame.numberOfPits).reverse()" @click="getMoves(pit.id)" :key="pit.id" :active="currentPlayer.id === mancalaGame.players[0].id">
+          <div class="pits-row" :active="currentPlayer.id === player0.id">
+            <div class="pit" v-for="pit in player0.pits.filter((x, xi) => xi < game.numberOfPits).reverse()" @click="getActions(pit.id)" :key="pit.id" :active="currentPlayer.id === player0.id">
                 {{ pit.stones }}
             </div>
           </div>
-          <div class="pits-row" :active="currentPlayer.id === mancalaGame.players[1].id">
-            <div class="pit" v-for="pit in mancalaGame.players[1].pits.filter((x, xi) => xi < mancalaGame.numberOfPits)" @click="getMoves(pit.id)" :key="pit.id" :active="currentPlayer.id === mancalaGame.players[1].id">
+          <div class="pits-row" :active="currentPlayer.id === player1.id">
+            <div class="pit" v-for="pit in player1.pits.filter((x, xi) => xi < game.numberOfPits)" @click="getActions(pit.id)" :key="pit.id" :active="currentPlayer.id === player1.id">
                 {{ pit.stones }}
             </div>
           </div>
         </div>
-        <div class="large-pit-container" :active="currentPlayer.id === mancalaGame.players[1].id">
-          <div class="pit" :key="mancalaGame.players[1].largePit.id" :active="false">
-              {{ mancalaGame.players[1].largePit.stones }}
+        <div class="large-pit-container" :active="currentPlayer.id === player1.id">
+          <div class="pit" :key="player1.largePit.id" :active="false">
+              {{ player1.largePit.stones }}
           </div>
         </div>
       </div>
@@ -41,9 +42,20 @@ export default {
   name: "mancala-game",
   data() {
     return {
-      firstPlayer: {},
-      secondPlayer: {},
-      currentPlayer: {},
+      isProcessing: false,
+      isLoading: true,
+      player0: {
+        id: '',
+        username: '',
+      },
+      playerB: {},
+      currentPlayer: {
+        id: '',
+        username: ''
+      },
+      game: {
+        numberOfPits: 0
+      }
     };
   },
   components: {
@@ -51,15 +63,30 @@ export default {
   },
   methods: {
     getPlayerById(id) {
-      return this.mancalaGame.players.find((x) => x.id === id)
+      return this.player0.id === id ? this.player0 : this.player1
     },
-    getMoves(id) {
-      MancalaService.getMoves(id)
+    getActions(id) {
+      MancalaService.getActions(id)
         .then((response) => {
-          this.mancalaGame = response.data;
+          const actions = response.data.actions;
 
-          this.currentPlayer = this.getPlayerById(this.mancalaGame.currentPlayerId)
+          this.isProcessing = true;
+          let actionIndex = 0;
+          const tickTime = 1000;
+          const tick = () => {
+             if(actionIndex < actions.length){
+              const action = actions[actionIndex];
+                if(action.actionType === "MOVE"){
+                this.processMoveAction(action)
+              }
 
+              actionIndex++;
+              setTimeout(tick, tickTime)
+            }else{
+              this.isProcessing = false;
+            }
+          }
+          setTimeout(tick, tickTime)
         })
         .catch((e) => {
           console.log(e);
@@ -73,17 +100,42 @@ export default {
     isNotLargePit(name){
       console.log(name)
       return !name.includes("large");
-    }
-  },
-  mounted() {
-    MancalaService.getGame()
+    },
+    processMoveAction(action){
+      console.info(action)
+      const fromPit = this.game.allPints.find((x) => x.id === action.fromPitId);
+      const toPit = this.game.allPints.find((x) => x.id === action.toPitId);
+      fromPit.stones -= action.moveQuantity;
+      toPit.stones += action.moveQuantity;
+    },
+    setupBoard(){
+       MancalaService.getGame()
       .then((response) => {
-        this.mancalaGame = response.data;
-        this.currentPlayer = this.getPlayerById(this.mancalaGame.currentPlayerId)
+        const mancalaGame = response.data;
+        this.player0 = {
+          id: mancalaGame.players[0].id,
+          username: mancalaGame.players[0].username,
+          largePit: mancalaGame.players[0].pits[mancalaGame.players[0].pits.length - 1],
+          pits: mancalaGame.players[0].pits,
+        }
+        this.player1 = {
+          id: mancalaGame.players[1].id,
+          username: mancalaGame.players[1].username,
+          largePit: mancalaGame.players[1].pits[mancalaGame.players[1].pits.length - 1],
+          pits: mancalaGame.players[1].pits,
+        }
+        this.game.numberOfPits = mancalaGame.numberOfPits;
+        this.game.allPints = [].concat(this.player0.pits).concat(this.player1.pits);
+        this.currentPlayer = this.getPlayerById(mancalaGame.currentPlayerId);
+        this.isLoading = false;
       })
       .catch(() => {
         this.$router.push("start");
       });
+    }
+  },
+  mounted() {
+   this.setupBoard();
   },
 };
 </script>
