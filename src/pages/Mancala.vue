@@ -4,24 +4,24 @@
     <p>Current Player Name: {{ currentPlayer.username }}</p>
     <p>IsProcessing: {{ isProcessing }}</p>
       <div class="board" v-show="!isLoading">
-        <div class="large-pit-container" :active="currentPlayer.id === player0.id">
+        <div class="large-pit-container" :active="isPlayer0Active()">
           <div class="pit" :key="player0.largePit.id" :active="false">
               {{ player0.largePit.stones }}
           </div>
         </div>
         <div class="pits-rows-container">
-          <div class="pits-row" :active="currentPlayer.id === player0.id">
-            <div class="pit" v-for="pit in player0.pits.filter((x, xi) => xi < game.numberOfPits).reverse()" @click="getActions(pit.id)" :key="pit.id" :active="currentPlayer.id === player0.id">
+          <div class="pits-row" :active="isPlayer0Active()">
+            <div class="pit" v-for="pit in player0.pits.filter((x, xi) => xi < game.numberOfPits).reverse()" @click="getActions(pit.id)" :key="pit.id" :active="isPlayer0Active()">
                 {{ pit.stones }}
             </div>
           </div>
-          <div class="pits-row" :active="currentPlayer.id === player1.id">
-            <div class="pit" v-for="pit in player1.pits.filter((x, xi) => xi < game.numberOfPits)" @click="getActions(pit.id)" :key="pit.id" :active="currentPlayer.id === player1.id">
+          <div class="pits-row" :active="isPlayer1Active()">
+            <div class="pit" v-for="pit in player1.pits.filter((x, xi) => xi < game.numberOfPits)" @click="getActions(pit.id)" :key="pit.id" :active="isPlayer1Active()">
                 {{ pit.stones }}
             </div>
           </div>
         </div>
-        <div class="large-pit-container" :active="currentPlayer.id === player1.id">
+        <div class="large-pit-container" :active="isPlayer1Active()">
           <div class="pit" :key="player1.largePit.id" :active="false">
               {{ player1.largePit.stones }}
           </div>
@@ -62,6 +62,12 @@ export default {
     EndButton,
   },
   methods: {
+    isPlayer0Active(){
+      return !this.isLoading && !this.isProcessing && this.currentPlayer.id === this.player0.id 
+    },
+    isPlayer1Active(){
+      return !this.isLoading && !this.isProcessing && this.currentPlayer.id === this.player1.id 
+    },
     getPlayerById(id) {
       return this.player0.id === id ? this.player0 : this.player1
     },
@@ -72,7 +78,7 @@ export default {
 
           this.isProcessing = true;
           let actionIndex = 0;
-          const tickTime = 1000;
+          const tickTime = 700;
           const tick = () => {
              if(actionIndex < actions.length){
               const action = actions[actionIndex];
