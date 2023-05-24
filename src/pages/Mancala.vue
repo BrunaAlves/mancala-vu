@@ -114,6 +114,8 @@ export default {
                 await this.processGameOverAction(action);
               }else if(action.actionType === "WINNER"){
                 await this.processWinnerAction(action);
+              }else if(action.actionType === "TIE"){
+                await this.processTieAction(action);
               }
 
               actionIndex++;
@@ -135,6 +137,10 @@ export default {
     isNotLargePit(name){
       console.log(name)
       return !name.includes("large");
+    },
+    async processTieAction(action){
+
+      await this.showNotification("TIE: " + action.tiedPlayersId.map((x) => this.getPlayerById(x).username).join(","));
     },
     processMoveAction(action){
       const fromPit = this.game.allPints.find((x) => x.id === action.fromPitId);
@@ -171,7 +177,6 @@ export default {
       await this.showNotification("Game is over!");
     },
     async processWinnerAction(action){
-      console.info(action)
       await this.showNotification("WINNER: " + this.getPlayerById(action.winnerPlayerId).username);
     },
     async showNotification(text) {
